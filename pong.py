@@ -1,23 +1,28 @@
+# Import the pygame library and initialize it
 import pygame
 pygame.init()
 
-
+# Define the window size and create the window
 WIDTH, HEIGHT = 700, 500
 WIN = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Pong")
 
+# Set the frames per second
 FPS = 60
 
+# Define some colors
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 
+# Define constants for the paddle and ball
 PADDLE_WIDTH, PADDLE_HEIGHT = 20, 100
 BALL_RADIUS = 7
 
+# Define the font for displaying the score and the winning score
 SCORE_FONT = pygame.font.SysFont("comicsans", 50)
 WINNING_SCORE = 10
 
-
+# Paddle class to represent the paddles
 class Paddle:
     COLOR = WHITE
     VEL = 4
@@ -29,8 +34,7 @@ class Paddle:
         self.height = height
 
     def draw(self, win):
-        pygame.draw.rect(
-            win, self.COLOR, (self.x, self.y, self.width, self.height))
+        pygame.draw.rect(win, self.COLOR, (self.x, self.y, self.width, self.height))
 
     def move(self, up=True):
         if up:
@@ -42,7 +46,7 @@ class Paddle:
         self.x = self.original_x
         self.y = self.original_y
 
-
+# Ball class to represent the ball
 class Ball:
     MAX_VEL = 5
     COLOR = WHITE
@@ -67,28 +71,30 @@ class Ball:
         self.y_vel = 0
         self.x_vel *= -1
 
-
+# Function to draw the game elements on the window
 def draw(win, paddles, ball, left_score, right_score):
     win.fill(BLACK)
 
+    # Draw the scores on the screen
     left_score_text = SCORE_FONT.render(f"{left_score}", 1, WHITE)
     right_score_text = SCORE_FONT.render(f"{right_score}", 1, WHITE)
     win.blit(left_score_text, (WIDTH//4 - left_score_text.get_width()//2, 20))
-    win.blit(right_score_text, (WIDTH * (3/4) -
-                                right_score_text.get_width()//2, 20))
+    win.blit(right_score_text, (WIDTH * (3/4) - right_score_text.get_width()//2, 20))
 
-    for paddle in paddles:
-        paddle.draw(win)
-
+    # Draw the net in the middle of the screen
     for i in range(10, HEIGHT, HEIGHT//20):
         if i % 2 == 1:
             continue
         pygame.draw.rect(win, WHITE, (WIDTH//2 - 5, i, 10, HEIGHT//20))
 
+    # Draw the paddles and the ball
+    for paddle in paddles:
+        paddle.draw(win)
     ball.draw(win)
+
     pygame.display.update()
 
-
+# Function to handle ball collisions with the paddles
 def handle_collision(ball, left_paddle, right_paddle):
     if ball.y + ball.radius >= HEIGHT:
         ball.y_vel *= -1
@@ -117,7 +123,7 @@ def handle_collision(ball, left_paddle, right_paddle):
                 y_vel = difference_in_y / reduction_factor
                 ball.y_vel = -1 * y_vel
 
-
+# Function to handle paddle movements based on user input
 def handle_paddle_movement(keys, left_paddle, right_paddle):
     if keys[pygame.K_w] and left_paddle.y - left_paddle.VEL >= 0:
         left_paddle.move(up=True)
@@ -129,15 +135,14 @@ def handle_paddle_movement(keys, left_paddle, right_paddle):
     if keys[pygame.K_DOWN] and right_paddle.y + right_paddle.VEL + right_paddle.height <= HEIGHT:
         right_paddle.move(up=False)
 
-
+# The main function to run the game loop
 def main():
     run = True
     clock = pygame.time.Clock()
 
-    left_paddle = Paddle(10, HEIGHT//2 - PADDLE_HEIGHT //
-                         2, PADDLE_WIDTH, PADDLE_HEIGHT)
-    right_paddle = Paddle(WIDTH - 10 - PADDLE_WIDTH, HEIGHT //
-                          2 - PADDLE_HEIGHT//2, PADDLE_WIDTH, PADDLE_HEIGHT)
+    # Create the paddles and the ball
+    left_paddle = Paddle(10, HEIGHT//2 - PADDLE_HEIGHT//2, PADDLE_WIDTH, PADDLE_HEIGHT)
+    right_paddle = Paddle(WIDTH - 10 - PADDLE_WIDTH, HEIGHT//2 - PADDLE_HEIGHT//2, PADDLE_WIDTH, PADDLE_HEIGHT)
     ball = Ball(WIDTH // 2, HEIGHT // 2, BALL_RADIUS)
 
     left_score = 0
@@ -147,6 +152,7 @@ def main():
         clock.tick(FPS)
         draw(WIN, [left_paddle, right_paddle], ball, left_score, right_score)
 
+        # Check for quit event
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False
@@ -158,6 +164,7 @@ def main():
         ball.move()
         handle_collision(ball, left_paddle, right_paddle)
 
+        # Check if the ball goes out of bounds and update the scores
         if ball.x < 0:
             right_score += 1
             ball.reset()
@@ -165,6 +172,7 @@ def main():
             left_score += 1
             ball.reset()
 
+        # Check if a player has won and display the winning text
         won = False
         if left_score >= WINNING_SCORE:
             won = True
@@ -175,8 +183,7 @@ def main():
 
         if won:
             text = SCORE_FONT.render(win_text, 1, WHITE)
-            WIN.blit(text, (WIDTH//2 - text.get_width() //
-                            2, HEIGHT//2 - text.get_height()//2))
+            WIN.blit(text, (WIDTH//2 - text.get_width() // 2, HEIGHT//2 - text.get_height() // 2))
             pygame.display.update()
             pygame.time.delay(5000)
             ball.reset()
@@ -186,7 +193,6 @@ def main():
             right_score = 0
 
     pygame.quit()
-
 
 if __name__ == '__main__':
     main()
