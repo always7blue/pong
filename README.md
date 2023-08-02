@@ -1,1 +1,1 @@
-# pong
+# classic pong game 
